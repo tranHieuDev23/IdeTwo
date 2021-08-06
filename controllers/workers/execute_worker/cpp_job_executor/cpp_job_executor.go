@@ -3,7 +3,6 @@ package cpp_job_executor
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io/fs"
 	"io/ioutil"
@@ -36,16 +35,10 @@ func (executor CppJobExecutor) Execute(source source_code.SourceCode) job_execut
 	executor.writeSourceFile(dir, source)
 
 	if err := executor.compileSourceFile(dir, source); err != nil {
-		return job_executor.JobExecutorOutput{
-			Status: source_code.CompileError,
-			Output: err.Error(),
-		}
+		return *err
 	}
 
-	return job_executor.JobExecutorOutput{
-		Status: source_code.Successful,
-		Output: executor.runExecutable(dir, source),
-	}
+	return *executor.runExecutable(dir, source)
 }
 
 // Write the source file to a temporary directory.
@@ -64,10 +57,10 @@ var resourcesConf = container.Resources{
 	CPUQuota: 100000,
 }
 
+const timeoutStatusCode = 124
+
 // Run the compiler within a Debian container with g++.
-//
-// If compiling fails, the compiler's stderr will be returned as an error.
-func (executor CppJobExecutor) compileSourceFile(dir tempdir.TempDir, source source_code.SourceCode) error {
+func (executor CppJobExecutor) compileSourceFile(dir tempdir.TempDir, source source_code.SourceCode) *job_executor.JobExecutorOutput {
 	cli := executor.cli
 	ctx := context.Background()
 	pathBind := fmt.Sprintf("%s:/workdir", dir.GetPath())
@@ -111,11 +104,21 @@ func (executor CppJobExecutor) compileSourceFile(dir tempdir.TempDir, source sou
 		if data.StatusCode == 0 {
 			return nil
 		}
+
+		if data.StatusCode == timeoutStatusCode {
+			return &job_executor.JobExecutorOutput{
+				Status: source_code.CompileTimeout,
+				Output: "",
+			}
+		}
 		stdoutBuffer := new(bytes.Buffer)
 		stderrBuffer := new(bytes.Buffer)
 		stdcopy.StdCopy(stdoutBuffer, stderrBuffer, attachResp.Reader)
 		compilerLog := stderrBuffer.String()
-		return errors.New(compilerLog)
+		return &job_executor.JobExecutorOutput{
+			Status: source_code.CompileError,
+			Output: compilerLog,
+		}
 
 	case err := <-errChan:
 		panic(err)
@@ -125,7 +128,7 @@ func (executor CppJobExecutor) compileSourceFile(dir tempdir.TempDir, source sou
 // Run the executable built from compileSourceFile().
 //
 // Return the program's output in stdout.
-func (executor CppJobExecutor) runExecutable(dir tempdir.TempDir, source source_code.SourceCode) string {
+func (executor CppJobExecutor) runExecutable(dir tempdir.TempDir, source source_code.SourceCode) *job_executor.JobExecutorOutput {
 	cli := executor.cli
 	ctx := context.Background()
 	pathBind := fmt.Sprintf("%s:/workdir", dir.GetPath())
@@ -170,12 +173,26 @@ func (executor CppJobExecutor) runExecutable(dir tempdir.TempDir, source source_
 
 	okChan, errChan := cli.ContainerWait(ctx, resp.ID, container.WaitConditionNotRunning)
 	select {
-	case <-okChan:
+	case data := <-okChan:
+		var status source_code.ExecutionStatus
+		switch data.StatusCode {
+		case 0:
+			status = source_code.Successful
+		case timeoutStatusCode:
+			status = source_code.RuntimeTimeout
+		default:
+			status = source_code.RuntimeError
+		}
+
 		stdoutBuffer := new(bytes.Buffer)
 		stderrBuffer := new(bytes.Buffer)
 		stdcopy.StdCopy(stdoutBuffer, stderrBuffer, attachResp.Reader)
 		stdout := stdoutBuffer.String()
-		return stdout
+
+		return &job_executor.JobExecutorOutput{
+			Status: status,
+			Output: stdout,
+		}
 
 	case err := <-errChan:
 		panic(err)
