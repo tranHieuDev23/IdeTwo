@@ -9,10 +9,11 @@ import (
 
 // Contain configuration settings extracted from .env file.
 type IdeTwoConfigs struct {
-	IdeTwoExecutionsDir string
-	MongoDbUri          string
-	MongoDbDb           string
-	FaktoryPoolCapacity int
+	IdeTwoExecutionsDir      string
+	MongoDbUri               string
+	MongoDbDb                string
+	FaktoryPoolCapacity      int
+	FaktoryWorkerConcurrency int
 }
 
 var instance *IdeTwoConfigs = nil
@@ -28,11 +29,16 @@ func GetInstance() IdeTwoConfigs {
 		if err != nil {
 			panic(err)
 		}
+		faktoryWorkerConcurrency, err := strconv.Atoi(env["FAKTORY_WORKER_CONCURRENCY"])
+		if err != nil {
+			panic(err)
+		}
 		instance = &IdeTwoConfigs{
-			IdeTwoExecutionsDir: env["IDETWO_EXECUTIONS_DIR"],
-			MongoDbUri:          env["MONGODB_URI"],
-			MongoDbDb:           env["MONGODB_DB"],
-			FaktoryPoolCapacity: faktoryPoolCapacity,
+			IdeTwoExecutionsDir:      env["IDETWO_EXECUTIONS_DIR"],
+			MongoDbUri:               env["MONGODB_URI"],
+			MongoDbDb:                env["MONGODB_DB"],
+			FaktoryPoolCapacity:      faktoryPoolCapacity,
+			FaktoryWorkerConcurrency: faktoryWorkerConcurrency,
 		}
 	})
 	return *instance

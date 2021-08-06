@@ -10,6 +10,7 @@ import (
 	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/job_executor"
 	"github.com/tranHieuDev23/IdeTwo/models/daos/source_code_dao"
 	"github.com/tranHieuDev23/IdeTwo/models/source_code"
+	"github.com/tranHieuDev23/IdeTwo/utils/configs"
 )
 
 type FaktoryWorker struct {
@@ -58,12 +59,13 @@ func executeJob(ctx context.Context, args ...interface{}) error {
 
 var instance *FaktoryWorker
 var once sync.Once
+var conf = configs.GetInstance()
 
 func GetInstance() FaktoryWorker {
 	once.Do(func() {
 		manager := worker.NewManager()
 		manager.Register("Execute Job", executeJob)
-		manager.Concurrency = 16
+		manager.Concurrency = conf.FaktoryWorkerConcurrency
 		manager.ProcessStrictPriorityQueues("critical", "default", "bulk")
 		instance = &FaktoryWorker{
 			manager: *manager,
