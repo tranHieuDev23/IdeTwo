@@ -132,7 +132,7 @@ func (executor CppJobExecutor) runExecutable(dir tempdir.TempDir, source source_
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image:        "debian",
 		WorkingDir:   "/workdir",
-		Cmd:          []string{"timeout", "--foreground", "30s", "./main"},
+		Cmd:          []string{"timeout", "--foreground", "30s", "./main", "|", "head", "-c", "8k"},
 		AttachStdin:  true,
 		AttachStdout: true,
 		OpenStdin:    true,
