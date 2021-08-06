@@ -43,6 +43,7 @@ func SourceCodeGroup(base gin.RouterGroup) gin.RouterGroup {
 				Id:       xid.New().String(),
 				Content:  base.Content,
 				Language: base.Language,
+				Status:   source_code.NotExecuted,
 				Input:    "",
 				Output:   "",
 			}
@@ -56,29 +57,26 @@ func SourceCodeGroup(base gin.RouterGroup) gin.RouterGroup {
 		})
 
 		group.PATCH("/:id", func(c *gin.Context) {
+			id := c.Param("id")
+			source := dao.GetSourceCode(id)
+			if source == nil {
+				c.JSON(http.StatusNotFound, gin.H{})
+				return
+			}
 			type SourceCodeBase struct {
-				Content  string                          `json:"content"`
-				Language source_code.ProgrammingLanguage `json:"language"`
-				Input    string                          `json:"input"`
+				Language source_code.ProgrammingLanguage `json:"language" valid:"range(0|4)"`
+				Content  string                          `json:"content" valid:"length(0|8192)"`
+				Input    string                          `json:"input" valid:"length(0|8192),optional"`
 			}
 			base := SourceCodeBase{}
 			if err := c.ShouldBindJSON(&base); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{})
 				return
 			}
-			id := c.Param("id")
-			source := source_code.SourceCode{
-				Id:       id,
-				Content:  base.Content,
-				Language: base.Language,
-				Input:    base.Input,
-				Output:   "",
-			}
-			if _, err := govalidator.ValidateStruct(source); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{})
-				return
-			}
-			newSource := dao.UpdateSourceCode(source)
+			source.Content = base.Content
+			source.Language = base.Language
+			source.Input = base.Input
+			newSource := dao.UpdateSourceCode(*source)
 			if newSource == nil {
 				c.JSON(http.StatusNotFound, gin.H{})
 				return

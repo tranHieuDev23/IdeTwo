@@ -7,6 +7,7 @@ import (
 
 	worker "github.com/contribsys/faktory_worker_go"
 	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/cpp_job_executor"
+	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/job_executor"
 	"github.com/tranHieuDev23/IdeTwo/models/daos/source_code_dao"
 	"github.com/tranHieuDev23/IdeTwo/models/source_code"
 )
@@ -31,7 +32,7 @@ func executeJob(ctx context.Context, args ...interface{}) error {
 		return nil
 	}
 
-	var executor JobExecutor
+	var executor job_executor.JobExecutor
 	switch source.Language {
 	case source_code.Cpp:
 		executor = cpp_job_executor.GetInstance()
@@ -45,8 +46,9 @@ func executeJob(ctx context.Context, args ...interface{}) error {
 		Id:       source.Id,
 		Language: source.Language,
 		Content:  source.Content,
+		Status:   output.Status,
 		Input:    source.Input,
-		Output:   output,
+		Output:   output.Output,
 	}
 	dao.UpdateSourceCode(newSource)
 

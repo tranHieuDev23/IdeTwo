@@ -14,6 +14,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
 	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/job_executor"
 	"github.com/tranHieuDev23/IdeTwo/models/source_code"
 	"github.com/tranHieuDev23/IdeTwo/utils/configs"
 	"github.com/tranHieuDev23/IdeTwo/utils/tempdir"
@@ -28,17 +29,23 @@ var instance *CppJobExecutor
 var once sync.Once
 var conf = configs.GetInstance()
 
-func (executor CppJobExecutor) Execute(source source_code.SourceCode) string {
+func (executor CppJobExecutor) Execute(source source_code.SourceCode) job_executor.JobExecutorOutput {
 	dir := tempdir.New(conf.IdeTwoExecutionsDir)
 	defer dir.Close()
 
 	executor.writeSourceFile(dir, source)
 
 	if err := executor.compileSourceFile(dir, source); err != nil {
-		return err.Error()
+		return job_executor.JobExecutorOutput{
+			Status: source_code.CompileError,
+			Output: err.Error(),
+		}
 	}
 
-	return executor.runExecutable(dir, source)
+	return job_executor.JobExecutorOutput{
+		Status: source_code.Successful,
+		Output: executor.runExecutable(dir, source),
+	}
 }
 
 // Write the source file to a temporary directory.
@@ -48,6 +55,13 @@ func (executor CppJobExecutor) writeSourceFile(dir tempdir.TempDir, source sourc
 	if err != nil {
 		panic(err)
 	}
+}
+
+var resourcesConf = container.Resources{
+	// 1 GB of RAM
+	Memory: 1073741824,
+	// 1 CPU core
+	CPUQuota: 100000,
 }
 
 // Run the compiler within a Debian container with g++.
@@ -64,7 +78,8 @@ func (executor CppJobExecutor) compileSourceFile(dir tempdir.TempDir, source sou
 		AttachStdout: true,
 		AttachStderr: true,
 	}, &container.HostConfig{
-		Binds: []string{pathBind},
+		Binds:     []string{pathBind},
+		Resources: resourcesConf,
 	}, nil, nil, "")
 	if err != nil {
 		panic(err)
@@ -123,7 +138,8 @@ func (executor CppJobExecutor) runExecutable(dir tempdir.TempDir, source source_
 		OpenStdin:    true,
 		StdinOnce:    true,
 	}, &container.HostConfig{
-		Binds: []string{pathBind},
+		Binds:     []string{pathBind},
+		Resources: resourcesConf,
 	}, nil, nil, "")
 	if err != nil {
 		panic(err)

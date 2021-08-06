@@ -10,6 +10,18 @@ const (
 	Python3
 )
 
+// The status of the source code after execution.
+type ExecutionStatus int
+
+const (
+	NotExecuted ExecutionStatus = iota
+	CompileError
+	CompileTimeout
+	RuntimeError
+	RuntimeTimeout
+	Successful
+)
+
 // A source code on the IdeTwo platform.
 type SourceCode struct {
 	// The unique id of this source code.
@@ -20,14 +32,16 @@ type SourceCode struct {
 	Language ProgrammingLanguage `json:"language" valid:"range(0|4)"`
 	// The content of the source code.
 	//
-	// Limited to up to 5 kB in size.
-	Content string `json:"content" valid:"length(0|5000)"`
-	// The last input data for the source code.
+	// Limited to up to 8 kB in size.
+	Content string `json:"content" valid:"length(0|8192)"`
+	// The lastest execution status of the source code.
+	Status ExecutionStatus `json:"status" valid:"range(0:6)"`
+	// The lastest input data for the source code.
 	//
-	// Limited to up to 5 kB in size.
-	Input string `json:"input" valid:"length(0|5000),optional"`
-	// The last output data of the source code.
+	// Limited to up to 8 kB in size.
+	Input string `json:"input" valid:"length(0|8192),optional"`
+	// The lastest output data of the source code.
 	//
-	// Limited to up to 5 kB in size.
-	Output string `json:"output" valid:"length(0|5000),optional"`
+	// Limited to up to 8 kB in size.
+	Output string `json:"output" valid:"length(0|8192),optional"`
 }
