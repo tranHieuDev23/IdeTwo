@@ -5,6 +5,7 @@ go 1.16
 replace github.com/tranHieuDev23/IdeTwo => ./
 
 require (
+	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/containerd/containerd v1.5.5 // indirect
 	github.com/contribsys/faktory v1.5.2

@@ -13,6 +13,7 @@ import (
 
 type DbCollections struct {
 	SourceCodeCollection *mongo.Collection
+	ExecutionCollection  *mongo.Collection
 	cancel               context.CancelFunc
 }
 
@@ -39,6 +40,7 @@ func GetInstance() DbCollections {
 		db := client.Database(c.MongoDbDb)
 		instance = &DbCollections{
 			SourceCodeCollection: db.Collection("source_codes"),
+			ExecutionCollection:  db.Collection("executions"),
 			cancel:               cancel,
 		}
 	})

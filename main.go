@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tranHieuDev23/IdeTwo/controllers/groups/execution_group"
 	"github.com/tranHieuDev23/IdeTwo/controllers/groups/source_code_group"
 	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker"
 	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/cpp_job_executor"
@@ -27,6 +28,7 @@ func main() {
 	api := app.Group("/api")
 	{
 		source_code_group.SourceCodeGroup(*api)
+		execution_group.ExecutionGroup(*api)
 	}
 	app.Run("127.0.0.1:8080")
 }

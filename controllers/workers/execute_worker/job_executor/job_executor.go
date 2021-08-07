@@ -1,11 +1,16 @@
 package job_executor
 
-import "github.com/tranHieuDev23/IdeTwo/models/source_code"
+import (
+	"github.com/tranHieuDev23/IdeTwo/models/execution"
+	"github.com/tranHieuDev23/IdeTwo/models/source_code"
+)
 
 // The output of a JobExecutor instance.
 type JobExecutorOutput struct {
-	// The new status of the SourceCode
-	Status source_code.ExecutionStatus
+	// The new status of the Execution
+	Status execution.ExecutionStatus
+	// The amount of time the execution took in millisecond.
+	RunTime int64
 	// If the program compiled unsuccessfully, this field's value is equal to
 	// the compiler's error log.
 	//

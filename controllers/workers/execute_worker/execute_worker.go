@@ -8,6 +8,7 @@ import (
 	worker "github.com/contribsys/faktory_worker_go"
 	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/cpp_job_executor"
 	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/job_executor"
+	"github.com/tranHieuDev23/IdeTwo/models/daos/execution_dao"
 	"github.com/tranHieuDev23/IdeTwo/models/daos/source_code_dao"
 	"github.com/tranHieuDev23/IdeTwo/models/source_code"
 	"github.com/tranHieuDev23/IdeTwo/utils/configs"
@@ -21,14 +22,19 @@ func (worker *FaktoryWorker) Run() {
 	worker.manager.Run()
 }
 
-var dao = source_code_dao.GetInstance()
+var sourceDao = source_code_dao.GetInstance()
+var executionDao = execution_dao.GetInstance()
 
 func executeJob(ctx context.Context, args ...interface{}) error {
 	helper := worker.HelperFor(ctx)
 	log.Printf("Working on job %s\n", helper.Jid())
 
 	id := args[0].(string)
-	source := dao.GetSourceCode(id)
+	exec := executionDao.GetExecution(id)
+	if exec == nil {
+		return nil
+	}
+	source := sourceDao.GetSourceCode(exec.OfSourceCodeId)
 	if source == nil {
 		return nil
 	}
@@ -43,15 +49,10 @@ func executeJob(ctx context.Context, args ...interface{}) error {
 
 	output := executor.Execute(*source)
 
-	newSource := source_code.SourceCode{
-		Id:       source.Id,
-		Language: source.Language,
-		Content:  source.Content,
-		Status:   output.Status,
-		Input:    source.Input,
-		Output:   output.Output,
-	}
-	dao.UpdateSourceCode(newSource)
+	exec.Status = output.Status
+	exec.RunTime = output.RunTime
+	exec.Output = output.Output
+	executionDao.UpdateExecution(*exec)
 
 	log.Printf("Job %s finished\n", helper.Jid())
 	return nil

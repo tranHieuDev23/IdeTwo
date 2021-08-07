@@ -3,25 +3,29 @@ package source_code_group
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/xid"
 
 	"github.com/tranHieuDev23/IdeTwo/controllers/proxies/faktory_proxy"
+	"github.com/tranHieuDev23/IdeTwo/models/daos/execution_dao"
 	"github.com/tranHieuDev23/IdeTwo/models/daos/source_code_dao"
+	"github.com/tranHieuDev23/IdeTwo/models/execution"
 	"github.com/tranHieuDev23/IdeTwo/models/source_code"
 )
 
 func SourceCodeGroup(base gin.RouterGroup) gin.RouterGroup {
-	dao := source_code_dao.GetInstance()
+	sourceDao := source_code_dao.GetInstance()
+	executionDao := execution_dao.GetInstance()
 	proxy := faktory_proxy.GetInstance()
 
 	group := base.Group("/source_codes")
 	{
 		group.GET("/:id", func(c *gin.Context) {
 			id := c.Param("id")
-			source := dao.GetSourceCode(id)
+			source := sourceDao.GetSourceCode(id)
 			if source == nil {
 				c.JSON(http.StatusNotFound, gin.H{})
 				return
@@ -43,22 +47,20 @@ func SourceCodeGroup(base gin.RouterGroup) gin.RouterGroup {
 				Id:       xid.New().String(),
 				Content:  base.Content,
 				Language: base.Language,
-				Status:   source_code.NotExecuted,
 				Input:    "",
-				Output:   "",
 			}
 			if _, err := govalidator.ValidateStruct(source); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{})
 				return
 			}
-			dao.CreateSourceCode(source)
+			sourceDao.CreateSourceCode(source)
 			c.Header("Location", fmt.Sprintf("%s%s", c.FullPath(), source.Id))
 			c.JSON(http.StatusCreated, source)
 		})
 
 		group.PATCH("/:id", func(c *gin.Context) {
 			id := c.Param("id")
-			source := dao.GetSourceCode(id)
+			source := sourceDao.GetSourceCode(id)
 			if source == nil {
 				c.JSON(http.StatusNotFound, gin.H{})
 				return
@@ -76,7 +78,7 @@ func SourceCodeGroup(base gin.RouterGroup) gin.RouterGroup {
 			source.Content = base.Content
 			source.Language = base.Language
 			source.Input = base.Input
-			newSource := dao.UpdateSourceCode(*source)
+			newSource := sourceDao.UpdateSourceCode(*source)
 			if newSource == nil {
 				c.JSON(http.StatusNotFound, gin.H{})
 				return
@@ -86,13 +88,20 @@ func SourceCodeGroup(base gin.RouterGroup) gin.RouterGroup {
 
 		group.POST("/:id/execute", func(c *gin.Context) {
 			id := c.Param("id")
-			source := dao.GetSourceCode(id)
+			source := sourceDao.GetSourceCode(id)
 			if source == nil {
 				c.JSON(http.StatusNotFound, gin.H{})
 				return
 			}
-			proxy.PushExecuteJob(id)
-			c.JSON(http.StatusOK, gin.H{})
+			exec := execution.Execution{
+				Id:             xid.New().String(),
+				OfSourceCodeId: source.Id,
+				Timestamp:      time.Now().UnixNano(),
+				Status:         execution.NotExecuted,
+			}
+			executionDao.CreateExecution(exec)
+			proxy.PushExecuteJob(exec.Id)
+			c.JSON(http.StatusOK, exec)
 		})
 	}
 	return *group

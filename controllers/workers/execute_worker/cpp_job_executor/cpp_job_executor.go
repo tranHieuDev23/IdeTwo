@@ -8,12 +8,15 @@ import (
 	"io/ioutil"
 	"sync"
 
+	"github.com/araddon/dateparse"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/archive"
 	"github.com/docker/docker/pkg/stdcopy"
+
 	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/job_executor"
+	"github.com/tranHieuDev23/IdeTwo/models/execution"
 	"github.com/tranHieuDev23/IdeTwo/models/source_code"
 	"github.com/tranHieuDev23/IdeTwo/utils/configs"
 	"github.com/tranHieuDev23/IdeTwo/utils/tempdir"
@@ -107,8 +110,9 @@ func (executor CppJobExecutor) compileSourceFile(dir tempdir.TempDir, source sou
 
 		if data.StatusCode == timeoutStatusCode {
 			return &job_executor.JobExecutorOutput{
-				Status: source_code.CompileTimeout,
-				Output: "",
+				Status:  execution.CompileTimeout,
+				RunTime: 0,
+				Output:  "",
 			}
 		}
 		stdoutBuffer := new(bytes.Buffer)
@@ -116,8 +120,9 @@ func (executor CppJobExecutor) compileSourceFile(dir tempdir.TempDir, source sou
 		stdcopy.StdCopy(stdoutBuffer, stderrBuffer, attachResp.Reader)
 		compilerLog := stderrBuffer.String()
 		return &job_executor.JobExecutorOutput{
-			Status: source_code.CompileError,
-			Output: compilerLog,
+			Status:  execution.CompileError,
+			RunTime: 0,
+			Output:  compilerLog,
 		}
 
 	case err := <-errChan:
@@ -173,16 +178,31 @@ func (executor CppJobExecutor) runExecutable(dir tempdir.TempDir, source source_
 
 	okChan, errChan := cli.ContainerWait(ctx, resp.ID, container.WaitConditionNotRunning)
 	select {
-	case data := <-okChan:
-		var status source_code.ExecutionStatus
-		switch data.StatusCode {
-		case 0:
-			status = source_code.Successful
-		case timeoutStatusCode:
-			status = source_code.RuntimeTimeout
-		default:
-			status = source_code.RuntimeError
+	case <-okChan:
+		inspectResp, err := cli.ContainerInspect(ctx, resp.ID)
+		if err != nil {
+			panic(err)
 		}
+
+		var status execution.ExecutionStatus
+		switch inspectResp.State.ExitCode {
+		case 0:
+			status = execution.Successful
+		case timeoutStatusCode:
+			status = execution.RuntimeTimeout
+		default:
+			status = execution.RuntimeError
+		}
+
+		startTime, err := dateparse.ParseAny(inspectResp.State.StartedAt)
+		if err != nil {
+			panic(err)
+		}
+		finishTime, err := dateparse.ParseAny(inspectResp.State.FinishedAt)
+		if err != nil {
+			panic(err)
+		}
+		runTime := finishTime.Sub(startTime).Milliseconds()
 
 		stdoutBuffer := new(bytes.Buffer)
 		stderrBuffer := new(bytes.Buffer)
@@ -190,8 +210,9 @@ func (executor CppJobExecutor) runExecutable(dir tempdir.TempDir, source source_
 		stdout := stdoutBuffer.String()
 
 		return &job_executor.JobExecutorOutput{
-			Status: status,
-			Output: stdout,
+			Status:  status,
+			RunTime: runTime,
+			Output:  stdout,
 		}
 
 	case err := <-errChan:
