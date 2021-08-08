@@ -69,7 +69,7 @@
             </div>
             <div class="flex-grow-1 overflow-auto">
                 <ngx-codemirror [options]="{mode: languageMode, lineNumbers: true, theme: 'ayu-mirage'}"
-                    [(ngModel)]="source.content">
+                    [(ngModel)]="source.content" (ngModelChange)="onEditorUpdated()">
                 </ngx-codemirror>
             </div>
         </div>
@@ -80,7 +80,7 @@
                 </div>
                 <div class="flex-grow-1 overflow-auto">
                     <ngx-codemirror [options]="{mode: null, lineNumbers: true, theme: 'ayu-mirage'}"
-                        [(ngModel)]="source.input"></ngx-codemirror>
+                        [(ngModel)]="source.input" (ngModelChange)="onEditorUpdated()"></ngx-codemirror>
                 </div>
             </div>
             <div class="w-100 h-50 d-flex flex-column">
@@ -113,6 +113,22 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div #unsavedModal class="modal fade" id="unsavedModal" tabindex="-1" aria-labelledby="unsavedLabel" aria-hidden="true"
+    data-bs-toggle="modal" data-bs-target="#unsavedModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                Unsaved changes will be lost. Are you sure?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal"
+                    (click)="onUnsavedModalConfirmed()">Yes</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">No</button>
             </div>
         </div>
     </div>

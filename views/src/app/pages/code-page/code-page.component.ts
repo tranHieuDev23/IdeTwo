@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { SourceCodeService } from 'src/app/services/source-code/source-code.service';
@@ -25,8 +25,14 @@ function newEmptyExecution(): Execution {
   styleUrls: ['./code-page.component.scss'],
 })
 export class CodePageComponent implements OnInit {
+  @ViewChild('unsavedModal')
+  public unsavedModalElement: ElementRef<HTMLElement>;
+
   public source = newEmptySourceCode();
   public execution = newEmptyExecution();
+  public unsaved = false;
+
+  public onUnsavedModalConfirmed: () => void = null;
 
   public get languageMode(): string {
     if (!this.source) {
@@ -74,10 +80,20 @@ export class CodePageComponent implements OnInit {
     });
   }
 
-  public newFile(): void {
+  public onEditorUpdated(): void {
+    this.unsaved = true;
+  }
+
+  public newFile(checkUnsaved: boolean = true): void {
+    if (checkUnsaved && this.unsaved) {
+      this.showUnsavedConfirmModal();
+      this.onUnsavedModalConfirmed = () => this.newFile(false);
+      return;
+    }
     this.location.replaceState(`/`);
     this.source = newEmptySourceCode();
     this.execution = newEmptyExecution();
+    this.unsaved = false;
   }
 
   public async saveFile(): Promise<void> {
@@ -95,13 +111,23 @@ export class CodePageComponent implements OnInit {
           this.source
         );
       }
+      this.unsaved = false;
     } catch {}
   }
 
-  public async openFile(id: string): Promise<void> {
+  public async openFile(
+    id: string,
+    checkUnsaved: boolean = true
+  ): Promise<void> {
+    if (checkUnsaved && this.unsaved) {
+      this.showUnsavedConfirmModal();
+      this.onUnsavedModalConfirmed = () => this.openFile(id, false).then();
+      return;
+    }
     try {
       this.source = await this.sourceCodeService.getSourceCode(id);
       this.execution = newEmptyExecution();
+      this.unsaved = false;
     } catch {
       this.newFile();
     }
@@ -146,4 +172,8 @@ export class CodePageComponent implements OnInit {
   }
 
   public async run(): Promise<void> {}
+
+  private showUnsavedConfirmModal(): void {
+    this.unsavedModalElement.nativeElement.click();
+  }
 }
