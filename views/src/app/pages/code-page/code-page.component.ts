@@ -120,7 +120,7 @@ export class CodePageComponent implements OnInit {
       return;
     }
     try {
-      this.source = await this.sourceCodeService.updateSourceCodeName(id, name);
+      await this.sourceCodeService.updateSourceCodeName(id, name);
     } catch {
       this.source.name = oldName;
     }
@@ -139,10 +139,7 @@ export class CodePageComponent implements OnInit {
       return;
     }
     try {
-      this.source = await this.sourceCodeService.updateSourceCodeLanguage(
-        id,
-        language
-      );
+      await this.sourceCodeService.updateSourceCodeLanguage(id, language);
     } catch {
       this.source.language = oldLanguage;
     }
