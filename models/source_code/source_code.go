@@ -16,6 +16,8 @@ type SourceCode struct {
 	//
 	// The user can use this id to access the source code on the website.
 	Id string `json:"id"`
+	// The name of the source code.
+	Name string `json:"name"`
 	// The programming language of this source code.
 	Language ProgrammingLanguage `json:"language" valid:"range(0|4)"`
 	// The content of the source code.

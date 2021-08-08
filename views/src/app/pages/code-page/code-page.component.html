@@ -15,16 +15,16 @@
                         File
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="fileDropdown">
-                        <li><span class="dropdown-item">New File</span></li>
-                        <li><span class="dropdown-item">Save file</span></li>
+                        <li (click)="newFile()"><span class="dropdown-item">New File</span></li>
+                        <li (click)="saveFile()"><span class="dropdown-item">Save File</span></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><span class="dropdown-item">Open recent...</span></li>
+                        <li><span class="dropdown-item">Open File...</span></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item">Save to device</a></li>
+                        <li (click)="saveToDevice()"><a class="dropdown-item">Save To Device...</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
@@ -33,11 +33,11 @@
                         Code
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="codeDropdown">
-                        <li><span class="dropdown-item">Change language</span></li>
+                        <li><span class="dropdown-item">Change Language Mode...</span></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item">Run</a></li>
+                        <li (click)="run()"><a class="dropdown-item">Run</a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
@@ -49,37 +49,46 @@
         </div>
     </div>
 </nav>
-<div class="container-fluid">
+<div class="container-fluid mb-3">
     <div class="row">
         <div class="col-12 col-md-8 vh-80 d-flex flex-column">
             <div class="d-flex p-2">
-                <div class="flex-grow-1 flex-shrink-1 text-light text-truncate">
+                <div class="flex-grow-1 flex-shrink-1 text-dark text-truncate">
                     <i class="bi bi-pencil-fill"></i>
-                    Solution to my problem
+                    <span *ngIf="source.name?.length">
+                        {{ source.name }}
+                    </span>
+                    <i *ngIf="source.name?.length === 0">
+                        Enter a name here...
+                    </i>
                 </div>
-                <div class="ps-5 text-light">
-                    Java
+                <div class="ps-5 text-dark">
+                    {{ languageName }}
                 </div>
             </div>
             <div class="flex-grow-1 overflow-auto">
-                <ngx-codemirror [(ngModel)]="content" [options]="options"></ngx-codemirror>
+                <ngx-codemirror [options]="{mode: languageMode, lineNumbers: true, theme: 'ayu-mirage'}"
+                    [(ngModel)]="source.content">
+                </ngx-codemirror>
             </div>
         </div>
         <div class="col-12 col-md-4 vh-80">
             <div class="w-100 h-50 d-flex flex-column">
-                <div class="p-2 text-light">
+                <div class="p-2 text-dark">
                     Input
                 </div>
                 <div class="flex-grow-1 overflow-auto">
-                    <ngx-codemirror [(ngModel)]="content" [options]="options"></ngx-codemirror>
+                    <ngx-codemirror [options]="{mode: null, lineNumbers: true, theme: 'ayu-mirage'}"
+                        [(ngModel)]="source.input"></ngx-codemirror>
                 </div>
             </div>
             <div class="w-100 h-50 d-flex flex-column">
-                <div class="p-2 text-light">
+                <div class="p-2 text-dark">
                     Output
                 </div>
                 <div class="flex-grow-1 overflow-auto">
-                    <ngx-codemirror [(ngModel)]="content" [options]="options"></ngx-codemirror>
+                    <ngx-codemirror [options]="{mode: null, lineNumbers: true, theme: 'ayu-mirage', readOnly: true}"
+                        [ngModel]="execution.output"></ngx-codemirror>
                 </div>
             </div>
         </div>

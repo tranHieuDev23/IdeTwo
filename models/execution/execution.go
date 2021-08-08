@@ -21,6 +21,8 @@ type Execution struct {
 	Timestamp int64 `json:"timestamp"`
 	// The status of the execution.
 	Status ExecutionStatus `json:"status"`
+	// The exit code of the compiled program.
+	ExitCode int `json:"exitCode"`
 	// The amount of time the execution took in millisecond.
 	RunTime int64 `json:"runTime"`
 	// If the program compiled unsuccessfully, this field's value is equal to

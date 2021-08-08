@@ -4,6 +4,7 @@ import { CodePageComponent } from './code-page.component';
 import { CodePageRoutingModule } from './code-page-routing.module';
 import { CodemirrorModule } from '@ctrl/ngx-codemirror';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [CodePageComponent],

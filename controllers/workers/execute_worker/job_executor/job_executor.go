@@ -9,6 +9,8 @@ import (
 type JobExecutorOutput struct {
 	// The new status of the Execution
 	Status execution.ExecutionStatus
+	// The status code of the compiled program.
+	ExitCode int
 	// The amount of time the execution took in millisecond.
 	RunTime int64
 	// If the program compiled unsuccessfully, this field's value is equal to

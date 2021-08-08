@@ -16,6 +16,13 @@ import (
 	"github.com/tranHieuDev23/IdeTwo/models/source_code"
 )
 
+type sourceCodeBase struct {
+	Name     string                          `json:"name"`
+	Language source_code.ProgrammingLanguage `json:"language"`
+	Content  string                          `json:"content"`
+	Input    string                          `json:"input"`
+}
+
 func SourceCodeGroup(base gin.RouterGroup) gin.RouterGroup {
 	sourceDao := source_code_dao.GetInstance()
 	executionDao := execution_dao.GetInstance()
@@ -34,20 +41,17 @@ func SourceCodeGroup(base gin.RouterGroup) gin.RouterGroup {
 		})
 
 		group.POST("/", func(c *gin.Context) {
-			type SourceCodeBase struct {
-				Content  string                          `json:"content"`
-				Language source_code.ProgrammingLanguage `json:"language"`
-			}
-			base := SourceCodeBase{}
+			base := sourceCodeBase{}
 			if err := c.ShouldBindJSON(&base); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{})
 				return
 			}
 			source := source_code.SourceCode{
 				Id:       xid.New().String(),
-				Content:  base.Content,
+				Name:     base.Name,
 				Language: base.Language,
-				Input:    "",
+				Content:  base.Content,
+				Input:    base.Input,
 			}
 			if _, err := govalidator.ValidateStruct(source); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{})
@@ -65,12 +69,7 @@ func SourceCodeGroup(base gin.RouterGroup) gin.RouterGroup {
 				c.JSON(http.StatusNotFound, gin.H{})
 				return
 			}
-			type SourceCodeBase struct {
-				Language source_code.ProgrammingLanguage `json:"language" valid:"range(0|4)"`
-				Content  string                          `json:"content" valid:"length(0|8192)"`
-				Input    string                          `json:"input" valid:"length(0|8192),optional"`
-			}
-			base := SourceCodeBase{}
+			base := sourceCodeBase{}
 			if err := c.ShouldBindJSON(&base); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{})
 				return

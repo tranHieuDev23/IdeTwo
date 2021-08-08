@@ -194,6 +194,8 @@ func (executor CppJobExecutor) runExecutable(dir tempdir.TempDir, source source_
 			status = execution.RuntimeError
 		}
 
+		exitCode := inspectResp.State.ExitCode
+
 		startTime, err := dateparse.ParseAny(inspectResp.State.StartedAt)
 		if err != nil {
 			panic(err)
@@ -210,9 +212,10 @@ func (executor CppJobExecutor) runExecutable(dir tempdir.TempDir, source source_
 		stdout := stdoutBuffer.String()
 
 		return &job_executor.JobExecutorOutput{
-			Status:  status,
-			RunTime: runTime,
-			Output:  stdout,
+			Status:   status,
+			ExitCode: exitCode,
+			RunTime:  runTime,
+			Output:   stdout,
 		}
 
 	case err := <-errChan:
