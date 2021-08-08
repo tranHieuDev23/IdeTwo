@@ -1,1 +1,87 @@
-<p>code-page works!</p>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <span class="navbar-brand">
+            <i class="bi bi-code-slash"></i> IdeTwo
+        </span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="fileDropdown" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        File
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="fileDropdown">
+                        <li><span class="dropdown-item">New File</span></li>
+                        <li><span class="dropdown-item">Save file</span></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><span class="dropdown-item">Open recent...</span></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item">Save to device</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="codeDropdown" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        Code
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="codeDropdown">
+                        <li><span class="dropdown-item">Change language</span></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item">Run</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <span class="nav-link">
+                        About
+                    </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 col-md-8 vh-80 d-flex flex-column">
+            <div class="d-flex p-2">
+                <div class="flex-grow-1 flex-shrink-1 text-light text-truncate">
+                    <i class="bi bi-pencil-fill"></i>
+                    Solution to my problem
+                </div>
+                <div class="ps-5 text-light">
+                    Java
+                </div>
+            </div>
+            <div class="flex-grow-1 overflow-auto">
+                <ngx-codemirror [(ngModel)]="content" [options]="options"></ngx-codemirror>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 vh-80">
+            <div class="w-100 h-50 d-flex flex-column">
+                <div class="p-2 text-light">
+                    Input
+                </div>
+                <div class="flex-grow-1 overflow-auto">
+                    <ngx-codemirror [(ngModel)]="content" [options]="options"></ngx-codemirror>
+                </div>
+            </div>
+            <div class="w-100 h-50 d-flex flex-column">
+                <div class="p-2 text-light">
+                    Output
+                </div>
+                <div class="flex-grow-1 overflow-auto">
+                    <ngx-codemirror [(ngModel)]="content" [options]="options"></ngx-codemirror>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
