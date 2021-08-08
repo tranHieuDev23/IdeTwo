@@ -66,6 +66,7 @@ export class CodePageComponent implements OnInit {
   }
 
   public newFile(): void {
+    this.location.replaceState(`/`);
     this.source = newEmptySourceCode();
     this.execution = newEmptyExecution();
   }
