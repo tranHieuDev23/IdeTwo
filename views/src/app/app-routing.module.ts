@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   {
-    path: 'code',
+    path: ':id',
     loadChildren: () =>
       import('./pages/code-page/code-page.module').then(
         (m) => m.CodePageModule
@@ -12,8 +12,8 @@ const routes: Routes = [
   {
     path: '**',
     loadChildren: () =>
-      import('./pages/home-page/home-page.module').then(
-        (m) => m.HomePageModule
+      import('./pages/code-page/code-page.module').then(
+        (m) => m.CodePageModule
       ),
   },
 ];
