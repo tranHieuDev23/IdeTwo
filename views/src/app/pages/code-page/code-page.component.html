@@ -53,16 +53,11 @@
     <div class="row">
         <div class="col-12 col-md-8 vh-80 d-flex flex-column">
             <div class="d-flex p-2">
-                <div class="flex-grow-1 flex-shrink-1 text-dark text-truncate">
-                    <i class="bi bi-pencil-fill"></i>
-                    <span *ngIf="source.name?.length">
-                        {{ source.name }}
-                    </span>
-                    <i *ngIf="source.name?.length === 0">
-                        Enter a name here...
-                    </i>
+                <div class="flex-grow-1 flex-shrink-1">
+                    <app-editable-text [text]="source.name" prompt="Enter a name here..."
+                        (textChanged)="changeName($event)"></app-editable-text>
                 </div>
-                <div class="ps-5 text-dark">
+                <div class="ps-2 text-dark">
                     {{ languageName }}
                 </div>
             </div>

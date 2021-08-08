@@ -99,6 +99,20 @@ export class CodePageComponent implements OnInit {
 
   public async saveToDevice(): Promise<void> {}
 
+  public async changeName(name: string): Promise<void> {
+    const id = this.source.id;
+    const oldName = this.source.name;
+    this.source.name = name;
+    if (!id) {
+      return;
+    }
+    try {
+      this.source = await this.sourceCodeService.updateSourceCodeName(id, name);
+    } catch {
+      this.source.name = oldName;
+    }
+  }
+
   public async changeLanguageMode(
     language: ProgrammingLanguage
   ): Promise<void> {}

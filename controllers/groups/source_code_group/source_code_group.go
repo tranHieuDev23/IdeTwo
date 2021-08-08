@@ -74,9 +74,41 @@ func SourceCodeGroup(base gin.RouterGroup) gin.RouterGroup {
 				c.JSON(http.StatusBadRequest, gin.H{})
 				return
 			}
-			source.Content = base.Content
+			source.Name = base.Name
 			source.Language = base.Language
+			source.Content = base.Content
 			source.Input = base.Input
+			if _, err := govalidator.ValidateStruct(source); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{})
+				return
+			}
+			newSource := sourceDao.UpdateSourceCode(*source)
+			if newSource == nil {
+				c.JSON(http.StatusNotFound, gin.H{})
+				return
+			}
+			c.JSON(http.StatusOK, newSource)
+		})
+
+		group.PATCH("/:id/name", func(c *gin.Context) {
+			id := c.Param("id")
+			source := sourceDao.GetSourceCode(id)
+			if source == nil {
+				c.JSON(http.StatusNotFound, gin.H{})
+				return
+			}
+			base := struct {
+				Name string `json:"name"`
+			}{}
+			if err := c.ShouldBindJSON(&base); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{})
+				return
+			}
+			source.Name = base.Name
+			if _, err := govalidator.ValidateStruct(source); err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{})
+				return
+			}
 			newSource := sourceDao.UpdateSourceCode(*source)
 			if newSource == nil {
 				c.JSON(http.StatusNotFound, gin.H{})

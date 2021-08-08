@@ -1,0 +1,13 @@
+<span *ngIf="!isEditing" class="text-truncate" (click)="startEditing()">
+    <i class="bi bi-pencil-fill"></i>
+    <span *ngIf="text.length">
+        {{ text }}
+    </span>
+    <i *ngIf="text.length === 0">
+        {{ prompt }}
+    </i>
+</span>
+<span *ngIf="isEditing">
+    <input #textInput type="text" class="form-control form-control-sm" [(ngModel)]="text" (keydown.enter)="submit()"
+        (keydown.esc)="cancelEditing()">
+</span>

@@ -45,6 +45,18 @@ export class SourceCodeService {
       .toPromise();
   }
 
+  public async updateSourceCodeName(
+    id: string,
+    name: string
+  ): Promise<SourceCode> {
+    name = name.trim();
+    return await this.http
+      .patch<SourceCode>(`/api/source_codes/${id}/name`, {
+        name,
+      })
+      .toPromise();
+  }
+
   public async executeSourceCode(id: string): Promise<Execution> {
     return await this.http
       .post<Execution>(`/api/source_codes/${id}/execute`, {})

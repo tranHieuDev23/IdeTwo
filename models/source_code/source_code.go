@@ -17,7 +17,9 @@ type SourceCode struct {
 	// The user can use this id to access the source code on the website.
 	Id string `json:"id"`
 	// The name of the source code.
-	Name string `json:"name"`
+	//
+	// Limited to up to 128 character.
+	Name string `json:"name" valid:"length(0|128)"`
 	// The programming language of this source code.
 	Language ProgrammingLanguage `json:"language" valid:"range(0|4)"`
 	// The content of the source code.
