@@ -57,6 +57,17 @@ export class SourceCodeService {
       .toPromise();
   }
 
+  public async updateSourceCodeLanguage(
+    id: string,
+    language: ProgrammingLanguage
+  ): Promise<SourceCode> {
+    return await this.http
+      .patch<SourceCode>(`/api/source_codes/${id}/language`, {
+        language,
+      })
+      .toPromise();
+  }
+
   public async executeSourceCode(id: string): Promise<Execution> {
     return await this.http
       .post<Execution>(`/api/source_codes/${id}/execute`, {})

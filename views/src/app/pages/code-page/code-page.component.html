@@ -33,7 +33,9 @@
                         Code
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="codeDropdown">
-                        <li><span class="dropdown-item">Change Language Mode...</span></li>
+                        <li data-bs-toggle="modal" data-bs-target="#changeLanguageModal">
+                            <span class="dropdown-item">Change Language Mode...</span>
+                        </li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
@@ -49,6 +51,7 @@
         </div>
     </div>
 </nav>
+
 <div class="container-fluid mb-3">
     <div class="row">
         <div class="col-12 col-md-8 vh-80 d-flex flex-column">
@@ -58,7 +61,10 @@
                         (textChanged)="changeName($event)"></app-editable-text>
                 </div>
                 <div class="ps-2 text-dark">
-                    {{ languageName }}
+                    <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="modal"
+                        data-bs-target="#changeLanguageModal">
+                        {{ languageName }}
+                    </button>
                 </div>
             </div>
             <div class="flex-grow-1 overflow-auto">
@@ -85,6 +91,28 @@
                     <ngx-codemirror [options]="{mode: null, lineNumbers: true, theme: 'ayu-mirage', readOnly: true}"
                         [ngModel]="execution.output"></ngx-codemirror>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="changeLanguageModal" tabindex="-1" aria-labelledby="changeLanguageLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeLanguageLabel">Change Language Mode</h5>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group">
+                    <li *ngFor="let item of languageModeOptions"
+                        [class]="{'list-group-item': true, 'list-group-item-action': true, 'disabled': item.value === source.language}"
+                        data-bs-dismiss="modal" (click)="changeLanguageMode(item.value)">
+                        {{ item.label }}
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

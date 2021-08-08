@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { SourceCodeService } from 'src/app/services/source-code/source-code.service';
 import { Execution, getExecutionStatusString } from 'src/models/execution';
 import {
+  getAllProgrammingLanguages,
   getProgrammingLanguageMode,
   getProgrammingLanguageName,
   ProgrammingLanguage,
@@ -28,25 +29,33 @@ export class CodePageComponent implements OnInit {
   public execution = newEmptyExecution();
 
   public get languageMode(): string {
-    if (!this.source || !this.source.language) {
+    if (!this.source) {
       return null;
     }
     return getProgrammingLanguageMode(this.source.language);
   }
 
   public get languageName(): string {
-    if (!this.source || !this.source.language) {
+    if (!this.source) {
       return '';
     }
     return getProgrammingLanguageName(this.source.language);
   }
 
   public get statusString(): string {
-    if (!this.execution || this.execution.status) {
+    if (!this.execution) {
       return '';
     }
     return getExecutionStatusString(this.execution.status);
   }
+
+  public languageModeOptions: { value: ProgrammingLanguage; label: string }[] =
+    getAllProgrammingLanguages().map((item) => {
+      return {
+        value: item,
+        label: getProgrammingLanguageName(item),
+      };
+    });
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -101,6 +110,9 @@ export class CodePageComponent implements OnInit {
   public async saveToDevice(): Promise<void> {}
 
   public async changeName(name: string): Promise<void> {
+    if (name === this.source.name) {
+      return;
+    }
     const id = this.source.id;
     const oldName = this.source.name;
     this.source.name = name;
@@ -116,7 +128,25 @@ export class CodePageComponent implements OnInit {
 
   public async changeLanguageMode(
     language: ProgrammingLanguage
-  ): Promise<void> {}
+  ): Promise<void> {
+    if (language === this.source.language) {
+      return;
+    }
+    const id = this.source.id;
+    const oldLanguage = this.source.language;
+    this.source.language = language;
+    if (!id) {
+      return;
+    }
+    try {
+      this.source = await this.sourceCodeService.updateSourceCodeLanguage(
+        id,
+        language
+      );
+    } catch {
+      this.source.language = oldLanguage;
+    }
+  }
 
   public async run(): Promise<void> {}
 }

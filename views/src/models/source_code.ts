@@ -5,6 +5,15 @@ export enum ProgrammingLanguage {
   Python3,
 }
 
+export function getAllProgrammingLanguages(): ProgrammingLanguage[] {
+  return [
+    ProgrammingLanguage.C,
+    ProgrammingLanguage.Cpp,
+    ProgrammingLanguage.Java,
+    ProgrammingLanguage.Python3,
+  ];
+}
+
 const languageNames = ['C (GCC 8.2)', 'C++ 17', 'Java 13', 'Python 3.9'];
 
 export function getProgrammingLanguageName(
