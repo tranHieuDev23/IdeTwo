@@ -126,7 +126,7 @@
             <div class="modal-body">
                 <ul class="list-group">
                     <li *ngFor="let item of languageModeOptions"
-                        [class]="{'list-group-item': true, 'list-group-item-action': true, 'disabled': item.value === source.language}"
+                        [class]="{'list-group-item': true, 'list-group-item-action': true, 'active': item.value === source.language}"
                         data-bs-dismiss="modal" (click)="changeLanguageMode(item.value)">
                         {{ item.label }}
                     </li>
