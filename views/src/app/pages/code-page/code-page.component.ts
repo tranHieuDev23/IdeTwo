@@ -16,6 +16,7 @@ import {
   ProgrammingLanguage,
   SourceCode,
 } from 'src/models/source_code';
+import { NotificationService } from 'src/app/services/notification/notification.service';
 
 function newEmptySourceCode(): SourceCode {
   return new SourceCode(null, '', ProgrammingLanguage.Cpp, '', '');
@@ -72,7 +73,8 @@ export class CodePageComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly location: Location,
-    private readonly sourceCodeService: SourceCodeService
+    private readonly sourceCodeService: SourceCodeService,
+    private readonly notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -110,6 +112,9 @@ export class CodePageComponent implements OnInit {
           this.source.language,
           this.source.content,
           this.source.input
+        );
+        this.notificationService.successNotification(
+          'New file saved successfully'
         );
         this.location.replaceState(`/${this.source.id}`);
       } else {

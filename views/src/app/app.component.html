@@ -1,1 +1,15 @@
 <router-outlet></router-outlet>
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div *ngFor="let item of notificationList" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div *ngIf="item.header?.length" class="toast-header">
+            <i *ngIf="item.type === 0" class="bi bi-check-circle me-2 text-success"></i>
+            <i *ngIf="item.type === 1" class="bi bi-x-circle me-2 text-danger"></i>
+            <i *ngIf="item.type === 2" class="bi bi-info-circle me-2 text-info"></i>
+            <i *ngIf="item.type === 3" class="bi bi-exclamation-triangle me-2 text-warning"></i>
+            <strong class="me-auto">{{ item.header }}</strong>
+        </div>
+        <div *ngIf="item.body?.length" class="toast-body">
+            {{ item.body }}
+        </div>
+    </div>
+</div>
