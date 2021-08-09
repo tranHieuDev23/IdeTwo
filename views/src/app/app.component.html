@@ -8,7 +8,7 @@
             <i *ngIf="item.type === 3" class="bi bi-exclamation-triangle me-2 text-warning"></i>
             <strong class="me-auto">{{ item.header }}</strong>
         </div>
-        <div *ngIf="item.body?.length" class="toast-body">
+        <div *ngIf="item.body?.length" class="toast-body bg-light">
             {{ item.body }}
         </div>
     </div>

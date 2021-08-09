@@ -1,4 +1,4 @@
-<span *ngIf="!isEditing" class="text-truncate" (click)="startEditing()">
+<span *ngIf="!isEditing" (click)="startEditing()">
     <i class="bi bi-pencil-fill"></i>
     <span *ngIf="text.length">
         {{ text }}
@@ -8,6 +8,6 @@
     </i>
 </span>
 <span *ngIf="isEditing">
-    <input #textInput type="text" class="form-control form-control-sm" [(ngModel)]="text" (keydown.enter)="submit()"
-        (keydown.esc)="cancelEditing()">
+    <input #textInput type="text" class="form-control form-control-sm" [maxlength]="maxLength" [(ngModel)]="text"
+        (keydown.enter)="submit()" (keydown.esc)="cancelEditing()">
 </span>

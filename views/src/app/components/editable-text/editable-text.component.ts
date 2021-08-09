@@ -17,6 +17,7 @@ export class EditableTextComponent {
 
   @Input() public text = '';
   @Input() public prompt = '';
+  @Input() public maxLength: number = undefined;
 
   public isEditing = false;
 

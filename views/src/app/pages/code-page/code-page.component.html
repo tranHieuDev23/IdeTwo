@@ -70,19 +70,19 @@
     <div class="row">
         <div class="col-12 col-md-8 vh-80 d-flex flex-column">
             <div class="d-flex p-2">
-                <div class="flex-grow-1 flex-shrink-1">
-                    <app-editable-text [text]="source.name" prompt="Enter a name here..."
+                <div class="flex-grow-1 flex-shrink-1 text-truncate">
+                    <app-editable-text [text]="source.name" prompt="Enter a name here..." [maxLength]="128"
                         (textChanged)="changeName($event)"></app-editable-text>
                 </div>
                 <div class="ps-2">
-                    <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="modal"
+                    <button type="button" class="btn btn-sm btn-dark text-nowrap" data-bs-toggle="modal"
                         data-bs-target="#changeLanguageModal">
                         {{ languageName }}
                     </button>
                 </div>
                 <div *ngIf="unsaved" class="ps-2">
                     <div
-                        class="display-inline-block py-1 px-2 border border-dark rounded bg-dark text-light lh-base fs-sm">
+                        class="display-inline-block py-1 px-2 border border-dark rounded bg-dark text-light lh-base fs-sm text-nowrap">
                         Not saved</div>
                 </div>
             </div>

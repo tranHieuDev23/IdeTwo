@@ -20,6 +20,8 @@ import {
 } from 'src/models/source_code';
 import { NotificationService } from 'src/app/services/notification/notification.service';
 import { FileIoService } from 'src/app/services/file-io/file-io.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { StatusCodes } from 'http-status-codes';
 
 function newEmptySourceCode(): SourceCode {
   return new SourceCode(null, '', ProgrammingLanguage.Cpp, '', '');
@@ -109,6 +111,9 @@ export class CodePageComponent implements OnInit {
   }
 
   public async saveFile(): Promise<void> {
+    if (!this.unsaved) {
+      return;
+    }
     try {
       if (!this.source.id) {
         this.source = await this.sourceCodeService.createSourceCode(
@@ -127,7 +132,9 @@ export class CodePageComponent implements OnInit {
         );
       }
       this.unsaved = false;
-    } catch {}
+    } catch (e) {
+      this.notificationService.errorNotification('Failed to save file', e);
+    }
   }
 
   @HostListener('window:keydown.control.s', ['$event'])
@@ -172,8 +179,8 @@ export class CodePageComponent implements OnInit {
       this.source = await this.sourceCodeService.getSourceCode(id);
       this.execution = newEmptyExecution();
       this.unsaved = false;
-    } catch {
-      this.newFile();
+    } catch (e) {
+      this.notificationService.errorNotification('Failed to open file', e);
     }
   }
 
@@ -189,7 +196,7 @@ export class CodePageComponent implements OnInit {
   }
 
   public async changeName(name: string): Promise<void> {
-    if (name === this.source.name) {
+    if (name === this.source.name || name.length > 128) {
       return;
     }
     const id = this.source.id;
@@ -200,7 +207,8 @@ export class CodePageComponent implements OnInit {
     }
     try {
       await this.sourceCodeService.updateSourceCodeName(id, name);
-    } catch {
+    } catch (e) {
+      this.notificationService.errorNotification('Failed to change name', e);
       this.source.name = oldName;
     }
   }
@@ -219,7 +227,11 @@ export class CodePageComponent implements OnInit {
     }
     try {
       await this.sourceCodeService.updateSourceCodeLanguage(id, language);
-    } catch {
+    } catch (e) {
+      this.notificationService.errorNotification(
+        'Failed to change language mode',
+        e
+      );
       this.source.language = oldLanguage;
     }
   }
