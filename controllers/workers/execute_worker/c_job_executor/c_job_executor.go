@@ -1,4 +1,4 @@
-package cpp_job_executor
+package c_job_executor
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ import (
 	"github.com/tranHieuDev23/IdeTwo/utils/tempdir"
 )
 
-// Logic to handle code execution for C++ source codes.
+// Logic to handle code execution for C source codes.
 type CJobExecutor struct {
 	cli client.Client
 }
@@ -45,7 +45,7 @@ func (executor CJobExecutor) Execute(source source_code.SourceCode) job_executor
 
 // Write the source file to a temporary directory.
 func (executor CJobExecutor) writeSourceFile(dir tempdir.TempDir, source source_code.SourceCode) {
-	sourceFilePath := fmt.Sprintf("%s/main.cpp", dir.GetPath())
+	sourceFilePath := fmt.Sprintf("%s/main.c", dir.GetPath())
 	err := ioutil.WriteFile(sourceFilePath, []byte(source.Content), fs.FileMode(0444))
 	if err != nil {
 		panic(err)
@@ -69,7 +69,7 @@ func (executor CJobExecutor) compileSourceFile(dir tempdir.TempDir, source sourc
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image:        "gcc:8.5-buster",
 		WorkingDir:   "/workdir",
-		Cmd:          []string{"timeout", "30s", "gcc", "-o", "main", "main.cpp"},
+		Cmd:          []string{"timeout", "30s", "gcc", "-o", "main", "main.c"},
 		AttachStdout: true,
 		AttachStderr: true,
 	}, &container.HostConfig{

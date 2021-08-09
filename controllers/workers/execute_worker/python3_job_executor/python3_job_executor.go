@@ -1,4 +1,4 @@
-package cpp_job_executor
+package python3_job_executor
 
 import (
 	"bytes"
@@ -21,31 +21,26 @@ import (
 	"github.com/tranHieuDev23/IdeTwo/utils/tempdir"
 )
 
-// Logic to handle code execution for C++ source codes.
-type CJobExecutor struct {
+// Logic to handle code execution for Python source codes.
+type CppJobExecutor struct {
 	cli client.Client
 }
 
-var instance *CJobExecutor
+var instance *CppJobExecutor
 var once sync.Once
 var conf = configs.GetInstance()
 
-func (executor CJobExecutor) Execute(source source_code.SourceCode) job_executor.JobExecutorOutput {
+func (executor CppJobExecutor) Execute(source source_code.SourceCode) job_executor.JobExecutorOutput {
 	dir := tempdir.New(conf.IdeTwoExecutionsDir)
 	defer dir.Close()
 
 	executor.writeSourceFile(dir, source)
-
-	if err := executor.compileSourceFile(dir, source); err != nil {
-		return *err
-	}
-
 	return *executor.runExecutable(dir, source)
 }
 
 // Write the source file to a temporary directory.
-func (executor CJobExecutor) writeSourceFile(dir tempdir.TempDir, source source_code.SourceCode) {
-	sourceFilePath := fmt.Sprintf("%s/main.cpp", dir.GetPath())
+func (executor CppJobExecutor) writeSourceFile(dir tempdir.TempDir, source source_code.SourceCode) {
+	sourceFilePath := fmt.Sprintf("%s/main.py", dir.GetPath())
 	err := ioutil.WriteFile(sourceFilePath, []byte(source.Content), fs.FileMode(0444))
 	if err != nil {
 		panic(err)
@@ -61,85 +56,17 @@ var resourcesConf = container.Resources{
 
 const timeoutStatusCode = 124
 
-// Run the compiler within a Debian container with gcc.
-func (executor CJobExecutor) compileSourceFile(dir tempdir.TempDir, source source_code.SourceCode) *job_executor.JobExecutorOutput {
-	cli := executor.cli
-	ctx := context.Background()
-	pathBind := fmt.Sprintf("%s:/workdir", dir.GetPath())
-	resp, err := cli.ContainerCreate(ctx, &container.Config{
-		Image:        "gcc:8.5-buster",
-		WorkingDir:   "/workdir",
-		Cmd:          []string{"timeout", "30s", "gcc", "-o", "main", "main.cpp"},
-		AttachStdout: true,
-		AttachStderr: true,
-	}, &container.HostConfig{
-		Binds:     []string{pathBind},
-		Resources: resourcesConf,
-	}, nil, nil, "")
-	if err != nil {
-		panic(err)
-	}
-
-	defer func() {
-		if err := cli.ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{}); err != nil {
-			panic(err)
-		}
-	}()
-
-	attachResp, err := cli.ContainerAttach(ctx, resp.ID, types.ContainerAttachOptions{
-		Stream: true,
-		Stdout: true,
-		Stderr: true,
-	})
-	if err != nil {
-		panic(err)
-	}
-	defer attachResp.Close()
-
-	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-		panic(err)
-	}
-
-	okChan, errChan := cli.ContainerWait(ctx, resp.ID, container.WaitConditionNotRunning)
-	select {
-	case data := <-okChan:
-		if data.StatusCode == 0 {
-			return nil
-		}
-
-		if data.StatusCode == timeoutStatusCode {
-			return &job_executor.JobExecutorOutput{
-				Status:  execution.CompileTimeout,
-				RunTime: 0,
-				Output:  "",
-			}
-		}
-		stdoutBuffer := new(bytes.Buffer)
-		stderrBuffer := new(bytes.Buffer)
-		stdcopy.StdCopy(stdoutBuffer, stderrBuffer, attachResp.Reader)
-		compilerLog := stderrBuffer.String()
-		return &job_executor.JobExecutorOutput{
-			Status:  execution.CompileError,
-			RunTime: 0,
-			Output:  compilerLog,
-		}
-
-	case err := <-errChan:
-		panic(err)
-	}
-}
-
 // Run the executable built from compileSourceFile().
 //
 // Return the program's output in stdout.
-func (executor CJobExecutor) runExecutable(dir tempdir.TempDir, source source_code.SourceCode) *job_executor.JobExecutorOutput {
+func (executor CppJobExecutor) runExecutable(dir tempdir.TempDir, source source_code.SourceCode) *job_executor.JobExecutorOutput {
 	cli := executor.cli
 	ctx := context.Background()
 	pathBind := fmt.Sprintf("%s:/workdir", dir.GetPath())
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
-		Image:        "debian:buster",
+		Image:        "python:3.9-buster",
 		WorkingDir:   "/workdir",
-		Cmd:          []string{"timeout", "--foreground", "30s", "./main", "|", "head", "-c", "8k"},
+		Cmd:          []string{"timeout", "--foreground", "30s", "python3", "main.py", "|", "head", "-c", "8k"},
 		AttachStdin:  true,
 		AttachStdout: true,
 		OpenStdin:    true,
@@ -222,13 +149,13 @@ func (executor CJobExecutor) runExecutable(dir tempdir.TempDir, source source_co
 	}
 }
 
-func GetInstance() CJobExecutor {
+func GetInstance() CppJobExecutor {
 	once.Do(func() {
 		cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 		if err != nil {
 			panic(err)
 		}
-		instance = &CJobExecutor{
+		instance = &CppJobExecutor{
 			cli: *cli,
 		}
 		instance.prepareImage()
@@ -237,15 +164,10 @@ func GetInstance() CJobExecutor {
 }
 
 // Prepare the necessary Docker images, to save time when handling jobs.
-func (executor *CJobExecutor) prepareImage() {
+func (executor *CppJobExecutor) prepareImage() {
 	cli := executor.cli
 	ctx := context.Background()
-	_, err := cli.ImagePull(ctx, "docker.io/library/debian:buster", types.ImagePullOptions{})
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = cli.ImagePull(ctx, "docker.io/library/gcc:8.5-buster", types.ImagePullOptions{})
+	_, err := cli.ImagePull(ctx, "docker.io/library/python:3.9-buster", types.ImagePullOptions{})
 	if err != nil {
 		panic(err)
 	}

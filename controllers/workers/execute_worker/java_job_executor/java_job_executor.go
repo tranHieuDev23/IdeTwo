@@ -1,4 +1,4 @@
-package cpp_job_executor
+package java_job_executor
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ import (
 	"github.com/tranHieuDev23/IdeTwo/utils/tempdir"
 )
 
-// Logic to handle code execution for C++ source codes.
+// Logic to handle code execution for Java source codes.
 type CJobExecutor struct {
 	cli client.Client
 }
@@ -45,7 +45,7 @@ func (executor CJobExecutor) Execute(source source_code.SourceCode) job_executor
 
 // Write the source file to a temporary directory.
 func (executor CJobExecutor) writeSourceFile(dir tempdir.TempDir, source source_code.SourceCode) {
-	sourceFilePath := fmt.Sprintf("%s/main.cpp", dir.GetPath())
+	sourceFilePath := fmt.Sprintf("%s/Main.java", dir.GetPath())
 	err := ioutil.WriteFile(sourceFilePath, []byte(source.Content), fs.FileMode(0444))
 	if err != nil {
 		panic(err)
@@ -61,15 +61,15 @@ var resourcesConf = container.Resources{
 
 const timeoutStatusCode = 124
 
-// Run the compiler within a Debian container with gcc.
+// Run the compiler within a Debian container with javac.
 func (executor CJobExecutor) compileSourceFile(dir tempdir.TempDir, source source_code.SourceCode) *job_executor.JobExecutorOutput {
 	cli := executor.cli
 	ctx := context.Background()
 	pathBind := fmt.Sprintf("%s:/workdir", dir.GetPath())
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
-		Image:        "gcc:8.5-buster",
+		Image:        "openjdk:13-buster",
 		WorkingDir:   "/workdir",
-		Cmd:          []string{"timeout", "30s", "gcc", "-o", "main", "main.cpp"},
+		Cmd:          []string{"timeout", "30s", "javac", "Main.java"},
 		AttachStdout: true,
 		AttachStderr: true,
 	}, &container.HostConfig{
@@ -137,9 +137,9 @@ func (executor CJobExecutor) runExecutable(dir tempdir.TempDir, source source_co
 	ctx := context.Background()
 	pathBind := fmt.Sprintf("%s:/workdir", dir.GetPath())
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
-		Image:        "debian:buster",
+		Image:        "openjdk:13-buster",
 		WorkingDir:   "/workdir",
-		Cmd:          []string{"timeout", "--foreground", "30s", "./main", "|", "head", "-c", "8k"},
+		Cmd:          []string{"timeout", "--foreground", "30s", "java", "Main", "|", "head", "-c", "8k"},
 		AttachStdin:  true,
 		AttachStdout: true,
 		OpenStdin:    true,
@@ -240,12 +240,7 @@ func GetInstance() CJobExecutor {
 func (executor *CJobExecutor) prepareImage() {
 	cli := executor.cli
 	ctx := context.Background()
-	_, err := cli.ImagePull(ctx, "docker.io/library/debian:buster", types.ImagePullOptions{})
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = cli.ImagePull(ctx, "docker.io/library/gcc:8.5-buster", types.ImagePullOptions{})
+	_, err := cli.ImagePull(ctx, "docker.io/library/openjdk:13-buster", types.ImagePullOptions{})
 	if err != nil {
 		panic(err)
 	}

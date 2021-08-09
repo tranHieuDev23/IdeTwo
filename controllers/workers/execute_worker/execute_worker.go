@@ -6,8 +6,11 @@ import (
 	"sync"
 
 	worker "github.com/contribsys/faktory_worker_go"
+	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/c_job_executor"
 	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/cpp_job_executor"
+	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/java_job_executor"
 	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/job_executor"
+	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/python3_job_executor"
 	"github.com/tranHieuDev23/IdeTwo/models/daos/execution_dao"
 	"github.com/tranHieuDev23/IdeTwo/models/daos/source_code_dao"
 	"github.com/tranHieuDev23/IdeTwo/models/source_code"
@@ -41,8 +44,14 @@ func executeJob(ctx context.Context, args ...interface{}) error {
 
 	var executor job_executor.JobExecutor
 	switch source.Language {
-	case source_code.Cpp:
+	case source_code.C:
 		executor = cpp_job_executor.GetInstance()
+	case source_code.Cpp:
+		executor = c_job_executor.GetInstance()
+	case source_code.Java:
+		executor = java_job_executor.GetInstance()
+	case source_code.Python3:
+		executor = python3_job_executor.GetInstance()
 	default:
 		panic("Unsupported language")
 	}
