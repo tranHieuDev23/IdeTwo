@@ -1,7 +1,10 @@
 package main
 
 import (
+	"log"
+	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tranHieuDev23/IdeTwo/controllers/groups/execution_group"
@@ -25,6 +28,22 @@ func main() {
 	cpp_job_executor.GetInstance()
 	// Start HTTP server
 	app := gin.Default()
+	// Serving static files
+	app.NoRoute(func(c *gin.Context) {
+		path := c.Request.URL.Path
+		log.Println(path)
+		if strings.HasPrefix(path, "/api") {
+			c.Next()
+			return
+		}
+		if strings.Contains(path, ".") {
+			fs := http.Dir("views/dist/views")
+			c.FileFromFS(path, fs)
+			return
+		}
+		c.File("views/dist/views/index.html")
+	})
+	// API endpoints
 	api := app.Group("/api")
 	{
 		source_code_group.SourceCodeGroup(*api)
