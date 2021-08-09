@@ -18,7 +18,7 @@ import {
   SourceCode,
 } from 'src/models/source_code';
 import { NotificationService } from 'src/app/services/notification/notification.service';
-import { FileIoService } from 'src/app/services/file-reader/file-reader.service';
+import { FileIoService } from 'src/app/services/file-io/file-io.service';
 
 function newEmptySourceCode(): SourceCode {
   return new SourceCode(null, '', ProgrammingLanguage.Cpp, '', '');
