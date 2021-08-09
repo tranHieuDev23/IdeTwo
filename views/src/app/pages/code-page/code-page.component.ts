@@ -232,7 +232,11 @@ export class CodePageComponent implements OnInit {
     }
   }
 
-  public async run(): Promise<void> {
+  @HostListener('window:keydown.control.r', ['$event'])
+  public async run(event: KeyboardEvent = null): Promise<void> {
+    if (event) {
+      event.preventDefault();
+    }
     if (this.unsaved) {
       this.notificationService.warningNotification(
         'Source code is not saved',
