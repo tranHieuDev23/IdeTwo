@@ -32,8 +32,8 @@ function newEmptyExecution(): Execution {
   styleUrls: ['./code-page.component.scss'],
 })
 export class CodePageComponent implements OnInit {
-  @ViewChild('unsavedModal')
-  public unsavedModalElement: ElementRef<HTMLElement>;
+  @ViewChild('unsavedModalToggler')
+  public unsavedModalToggler: ElementRef<HTMLElement>;
 
   public source = newEmptySourceCode();
   public execution = newEmptyExecution();
@@ -193,6 +193,6 @@ export class CodePageComponent implements OnInit {
   public async run(): Promise<void> {}
 
   private showUnsavedConfirmModal(): void {
-    this.unsavedModalElement.nativeElement.click();
+    this.unsavedModalToggler.nativeElement.click();
   }
 }
