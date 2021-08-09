@@ -6,6 +6,7 @@ import { CodemirrorModule } from '@ctrl/ngx-codemirror';
 import { FormsModule } from '@angular/forms';
 import { EditableTextModule } from 'src/app/components/editable-text/editable-text.module';
 import { FilePickerModule } from 'src/app/components/file-picker/file-picker.module';
+import { TextBlockModule } from 'src/app/components/text-block/text-block.module';
 
 @NgModule({
   declarations: [CodePageComponent],
@@ -16,6 +17,7 @@ import { FilePickerModule } from 'src/app/components/file-picker/file-picker.mod
     FormsModule,
     EditableTextModule,
     FilePickerModule,
+    TextBlockModule,
   ],
   exports: [CodePageComponent],
 })

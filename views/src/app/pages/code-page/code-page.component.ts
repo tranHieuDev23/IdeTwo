@@ -20,15 +20,10 @@ import {
 } from 'src/models/source_code';
 import { NotificationService } from 'src/app/services/notification/notification.service';
 import { FileIoService } from 'src/app/services/file-io/file-io.service';
-import { HttpErrorResponse } from '@angular/common/http';
-import { StatusCodes } from 'http-status-codes';
+import { ExecutionService } from 'src/app/services/execution/execution.service';
 
 function newEmptySourceCode(): SourceCode {
   return new SourceCode(null, '', ProgrammingLanguage.Cpp, '', '');
-}
-
-function newEmptyExecution(): Execution {
-  return new Execution(null, null, null, null, null, null, '');
 }
 
 @Component({
@@ -41,7 +36,7 @@ export class CodePageComponent implements OnInit {
   public unsavedModalToggler: ElementRef<HTMLElement>;
 
   public source = newEmptySourceCode();
-  public execution = newEmptyExecution();
+  public execution: Execution = null;
   public unsaved = false;
 
   public onUnsavedModalConfirmed: () => void = null;
@@ -80,6 +75,7 @@ export class CodePageComponent implements OnInit {
     private readonly location: Location,
     private readonly fileIo: FileIoService,
     private readonly sourceCodeService: SourceCodeService,
+    private readonly executionService: ExecutionService,
     private readonly notificationService: NotificationService
   ) {}
 
@@ -106,7 +102,7 @@ export class CodePageComponent implements OnInit {
     }
     this.location.replaceState(`/`);
     this.source = newEmptySourceCode();
-    this.execution = newEmptyExecution();
+    this.execution = null;
     this.unsaved = true;
   }
 
@@ -162,7 +158,7 @@ export class CodePageComponent implements OnInit {
     const language = getProgrammingLanguageFromFilename(file.name);
     this.location.replaceState(`/`);
     this.source = new SourceCode(null, '', language, content, '');
-    this.execution = newEmptyExecution();
+    this.execution = null;
     this.unsaved = true;
   }
 
@@ -177,7 +173,7 @@ export class CodePageComponent implements OnInit {
     }
     try {
       this.source = await this.sourceCodeService.getSourceCode(id);
-      this.execution = newEmptyExecution();
+      this.execution = null;
       this.unsaved = false;
     } catch (e) {
       this.notificationService.errorNotification('Failed to open file', e);
@@ -236,7 +232,46 @@ export class CodePageComponent implements OnInit {
     }
   }
 
-  public async run(): Promise<void> {}
+  public async run(): Promise<void> {
+    if (this.unsaved) {
+      this.notificationService.warningNotification(
+        'Source code is not saved',
+        'Please save your source code before running'
+      );
+      return;
+    }
+    try {
+      this.execution = await this.sourceCodeService.executeSourceCode(
+        this.source.id
+      );
+      this.notificationService.successNotification(
+        'Run request created successfully',
+        'Check the Output window for information'
+      );
+
+      this.executionService.observeExecution(this.execution.id).subscribe(
+        (newExec) => {
+          this.execution = newExec;
+        },
+        (error) => {
+          this.notificationService.errorNotification(
+            'Failed to run program',
+            error
+          );
+        },
+        () => {
+          this.notificationService.successNotification(
+            'The program has finished running'
+          );
+        }
+      );
+    } catch (e) {
+      this.notificationService.errorNotification(
+        'Failed to create run request',
+        e
+      );
+    }
+  }
 
   private shouldShowUnsavedConfirmModal(): boolean {
     if (!this.source.id) {

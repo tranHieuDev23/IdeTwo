@@ -81,9 +81,7 @@
                     </button>
                 </div>
                 <div *ngIf="unsaved" class="ps-2">
-                    <div
-                        class="display-inline-block py-1 px-2 border border-dark rounded bg-dark text-light lh-base fs-sm text-nowrap">
-                        Not saved</div>
+                    <app-text-block text="Not saved"></app-text-block>
                 </div>
             </div>
             <div class="flex-grow-1 overflow-auto">
@@ -93,8 +91,8 @@
             </div>
         </div>
         <div class="col-12 col-md-4 vh-80">
-            <div class="w-100 h-50 d-flex flex-column">
-                <div class="p-2 text-dark">
+            <div class="w-100 h-50 d-flex flex-column py-2">
+                <div class="text-dark py-2">
                     Input
                 </div>
                 <div class="flex-grow-1 overflow-auto">
@@ -103,12 +101,29 @@
                 </div>
             </div>
             <div class="w-100 h-50 d-flex flex-column">
-                <div class="p-2 text-dark">
-                    Output
+                <div class="d-flex">
+                    <div class="text-dark py-2">
+                        Output
+                    </div>
+                    <div *ngIf="execution" class="flex-grow-1 flex-shrink-1 d-flex justify-content-end">
+                        <div *ngIf="execution.status === 0" class="spinner-border" role="status"></div>
+                        <ng-container *ngIf="execution.status > 0">
+                            <app-text-block class="px-2" [text]="statusString" [type]="execution.status === 5? 1 : 2">
+                            </app-text-block>
+                            <app-text-block *ngIf="execution.status === 3" [text]="'Exit code: ' + execution.exitCode"
+                                [type]="2">
+                            </app-text-block>
+                            <app-text-block *ngIf="execution.status === 4 || execution.status === 5"
+                                [text]="'Run time: ' + execution.runTime + ' ms'"
+                                [type]="execution.status === 4? 2 : 1">
+                            </app-text-block>
+                        </ng-container>
+                    </div>
                 </div>
                 <div class="flex-grow-1 overflow-auto">
                     <ngx-codemirror [options]="{mode: null, lineNumbers: true, theme: 'ayu-mirage', readOnly: true}"
-                        [ngModel]="execution.output"></ngx-codemirror>
+                        [ngModel]="execution? execution.output : ''">
+                    </ngx-codemirror>
                 </div>
             </div>
         </div>
