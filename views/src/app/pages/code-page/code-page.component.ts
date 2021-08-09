@@ -1,4 +1,10 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { SourceCodeService } from 'src/app/services/source-code/source-code.service';
@@ -113,6 +119,14 @@ export class CodePageComponent implements OnInit {
       }
       this.unsaved = false;
     } catch {}
+  }
+
+  @HostListener('window:keydown.control.s', ['$event'])
+  public async onSaveFileShortcut(event: KeyboardEvent): Promise<void> {
+    if (event) {
+      event.preventDefault();
+    }
+    await this.saveFile();
   }
 
   public async openFile(

@@ -15,8 +15,16 @@
                         File
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="fileDropdown">
-                        <li (click)="newFile()"><span class="dropdown-item">New File</span></li>
-                        <li (click)="saveFile()"><span class="dropdown-item">Save File</span></li>
+                        <li (click)="newFile()">
+                            <span class="dropdown-item">
+                                New File
+                            </span>
+                        </li>
+                        <li (click)="saveFile()">
+                            <span class="dropdown-item">
+                                Save File <small class="text-muted fs-6">(Ctrl + S)</small>
+                            </span>
+                        </li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
@@ -60,11 +68,16 @@
                     <app-editable-text [text]="source.name" prompt="Enter a name here..."
                         (textChanged)="changeName($event)"></app-editable-text>
                 </div>
-                <div class="ps-2 text-dark">
+                <div class="ps-2">
                     <button type="button" class="btn btn-sm btn-dark" data-bs-toggle="modal"
                         data-bs-target="#changeLanguageModal">
                         {{ languageName }}
                     </button>
+                </div>
+                <div class="ps-2">
+                    <div *ngIf="unsaved"
+                        class="display-inline-block py-1 px-2 border border-dark rounded bg-dark text-light lh-base fs-sm">
+                        Not saved</div>
                 </div>
             </div>
             <div class="flex-grow-1 overflow-auto">
