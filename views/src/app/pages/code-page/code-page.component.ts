@@ -11,6 +11,7 @@ import { SourceCodeService } from 'src/app/services/source-code/source-code.serv
 import { Execution, getExecutionStatusString } from 'src/models/execution';
 import {
   getAllProgrammingLanguages,
+  getProgrammingLanguageDefaultFilename,
   getProgrammingLanguageFromFilename,
   getProgrammingLanguageMode,
   getProgrammingLanguageName,
@@ -176,7 +177,16 @@ export class CodePageComponent implements OnInit {
     }
   }
 
-  public async saveToDevice(): Promise<void> {}
+  @HostListener('window:keydown.control.shift.s', ['$event'])
+  public async saveToDevice(event: KeyboardEvent = null): Promise<void> {
+    if (event) {
+      event.preventDefault();
+    }
+    const filename = getProgrammingLanguageDefaultFilename(
+      this.source.language
+    );
+    this.fileIo.saveFile(this.source.content, filename);
+  }
 
   public async changeName(name: string): Promise<void> {
     if (name === this.source.name) {

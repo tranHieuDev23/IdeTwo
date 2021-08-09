@@ -34,6 +34,14 @@ export function getProgrammingLanguageFromFilename(
   return ProgrammingLanguage.Cpp;
 }
 
+const languageDefaultFilename = ['main.c', 'main.cpp', 'Main.java', 'main.py'];
+
+export function getProgrammingLanguageDefaultFilename(
+  language: ProgrammingLanguage
+): string {
+  return languageDefaultFilename[language];
+}
+
 export function getProgrammingLanguageName(
   language: ProgrammingLanguage
 ): string {
