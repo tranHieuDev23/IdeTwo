@@ -16,6 +16,24 @@ export function getAllProgrammingLanguages(): ProgrammingLanguage[] {
 
 const languageNames = ['C (GCC 8.2)', 'C++ 17', 'Java 13', 'Python 3.9'];
 
+export function getProgrammingLanguageFromFilename(
+  fileName: string
+): ProgrammingLanguage {
+  if (fileName.endsWith('c')) {
+    return ProgrammingLanguage.C;
+  }
+  if (fileName.endsWith('cpp')) {
+    return ProgrammingLanguage.Cpp;
+  }
+  if (fileName.endsWith('java')) {
+    return ProgrammingLanguage.Java;
+  }
+  if (fileName.endsWith('py')) {
+    return ProgrammingLanguage.Python3;
+  }
+  return ProgrammingLanguage.Cpp;
+}
+
 export function getProgrammingLanguageName(
   language: ProgrammingLanguage
 ): string {

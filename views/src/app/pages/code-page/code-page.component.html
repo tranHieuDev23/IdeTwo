@@ -28,7 +28,9 @@
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><span class="dropdown-item">Open File...</span></li>
+                        <li (click)="filePicker.openFileDialog()">
+                            <span class="dropdown-item">Import Local File...</span>
+                        </li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
@@ -108,6 +110,8 @@
         </div>
     </div>
 </div>
+
+<app-file-picker #filePicker accept=".c,.cpp,.java,.py" (fileSelected)="importLocalFile($event)"></app-file-picker>
 
 <div class="modal fade" id="changeLanguageModal" tabindex="-1" aria-labelledby="changeLanguageLabel" aria-hidden="true">
     <div class="modal-dialog">

@@ -11,12 +11,14 @@ import { SourceCodeService } from 'src/app/services/source-code/source-code.serv
 import { Execution, getExecutionStatusString } from 'src/models/execution';
 import {
   getAllProgrammingLanguages,
+  getProgrammingLanguageFromFilename,
   getProgrammingLanguageMode,
   getProgrammingLanguageName,
   ProgrammingLanguage,
   SourceCode,
 } from 'src/models/source_code';
 import { NotificationService } from 'src/app/services/notification/notification.service';
+import { FileIoService } from 'src/app/services/file-reader/file-reader.service';
 
 function newEmptySourceCode(): SourceCode {
   return new SourceCode(null, '', ProgrammingLanguage.Cpp, '', '');
@@ -73,6 +75,7 @@ export class CodePageComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly location: Location,
+    private readonly fileIo: FileIoService,
     private readonly sourceCodeService: SourceCodeService,
     private readonly notificationService: NotificationService
   ) {}
@@ -84,7 +87,7 @@ export class CodePageComponent implements OnInit {
         this.newFile();
         return;
       }
-      this.openFile(id).then();
+      this.openFileById(id).then();
     });
   }
 
@@ -93,7 +96,7 @@ export class CodePageComponent implements OnInit {
   }
 
   public newFile(checkUnsaved: boolean = true): void {
-    if (checkUnsaved && this.unsaved) {
+    if (checkUnsaved && this.shouldShowUnsavedConfirmModal()) {
       this.showUnsavedConfirmModal();
       this.onUnsavedModalConfirmed = () => this.newFile(false);
       return;
@@ -101,7 +104,7 @@ export class CodePageComponent implements OnInit {
     this.location.replaceState(`/`);
     this.source = newEmptySourceCode();
     this.execution = newEmptyExecution();
-    this.unsaved = false;
+    this.unsaved = true;
   }
 
   public async saveFile(): Promise<void> {
@@ -134,13 +137,34 @@ export class CodePageComponent implements OnInit {
     await this.saveFile();
   }
 
-  public async openFile(
+  public async importLocalFile(
+    files: File[],
+    checkUnsaved: boolean = true
+  ): Promise<void> {
+    if (files.length === 0) {
+      return;
+    }
+    if (checkUnsaved && this.shouldShowUnsavedConfirmModal()) {
+      this.showUnsavedConfirmModal();
+      this.onUnsavedModalConfirmed = () => this.importLocalFile(files, false);
+      return;
+    }
+    const file = files[0];
+    const content = await this.fileIo.readFile(file);
+    const language = getProgrammingLanguageFromFilename(file.name);
+    this.location.replaceState(`/`);
+    this.source = new SourceCode(null, '', language, content, '');
+    this.execution = newEmptyExecution();
+    this.unsaved = true;
+  }
+
+  public async openFileById(
     id: string,
     checkUnsaved: boolean = true
   ): Promise<void> {
-    if (checkUnsaved && this.unsaved) {
+    if (checkUnsaved && this.shouldShowUnsavedConfirmModal()) {
       this.showUnsavedConfirmModal();
-      this.onUnsavedModalConfirmed = () => this.openFile(id, false).then();
+      this.onUnsavedModalConfirmed = () => this.openFileById(id, false).then();
       return;
     }
     try {
@@ -191,6 +215,13 @@ export class CodePageComponent implements OnInit {
   }
 
   public async run(): Promise<void> {}
+
+  private shouldShowUnsavedConfirmModal(): boolean {
+    if (!this.source.id) {
+      return this.source.content.length > 0;
+    }
+    return this.unsaved;
+  }
 
   private showUnsavedConfirmModal(): void {
     this.unsavedModalToggler.nativeElement.click();

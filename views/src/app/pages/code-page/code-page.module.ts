@@ -5,6 +5,7 @@ import { CodePageRoutingModule } from './code-page-routing.module';
 import { CodemirrorModule } from '@ctrl/ngx-codemirror';
 import { FormsModule } from '@angular/forms';
 import { EditableTextModule } from 'src/app/components/editable-text/editable-text.module';
+import { FilePickerModule } from 'src/app/components/file-picker/file-picker.module';
 
 @NgModule({
   declarations: [CodePageComponent],
@@ -14,6 +15,7 @@ import { EditableTextModule } from 'src/app/components/editable-text/editable-te
     CodemirrorModule,
     FormsModule,
     EditableTextModule,
+    FilePickerModule,
   ],
   exports: [CodePageComponent],
 })
