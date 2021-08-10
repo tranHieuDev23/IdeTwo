@@ -10,6 +10,8 @@ const ONE_SECOND = 1000;
   providedIn: 'root',
 })
 export class ExecutionService {
+  private currentInterval: any = null;
+
   constructor(private readonly http: HttpClient) {}
 
   public async getExecution(id: string): Promise<Execution> {
@@ -31,13 +33,18 @@ export class ExecutionService {
   }
 
   public observeExecution(id: string): Observable<Execution> {
+    if (this.currentInterval) {
+      clearInterval(this.currentInterval);
+    }
+
     return new Observable((subscriber) => {
-      const intervalHandler = setInterval(async () => {
+      this.currentInterval = setInterval(async () => {
         try {
           const execution = await this.getExecution(id);
           subscriber.next(execution);
           if (execution.status != ExecutionStatus.NotExecuted) {
-            clearInterval(intervalHandler);
+            clearInterval(this.currentInterval);
+            this.currentInterval = null;
             subscriber.complete();
           }
         } catch (e) {
