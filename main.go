@@ -10,7 +10,10 @@ import (
 	"github.com/tranHieuDev23/IdeTwo/controllers/groups/execution_group"
 	"github.com/tranHieuDev23/IdeTwo/controllers/groups/source_code_group"
 	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker"
+	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/c_job_executor"
 	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/cpp_job_executor"
+	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/java_job_executor"
+	"github.com/tranHieuDev23/IdeTwo/controllers/workers/execute_worker/python3_job_executor"
 	"github.com/tranHieuDev23/IdeTwo/utils/configs"
 )
 
@@ -25,7 +28,10 @@ func main() {
 	worker := execute_worker.GetInstance()
 	go worker.Run()
 	// Initialize all JobExecutor instances to save time on job handling
+	c_job_executor.GetInstance()
 	cpp_job_executor.GetInstance()
+	java_job_executor.GetInstance()
+	python3_job_executor.GetInstance()
 	// Start HTTP server
 	app := gin.Default()
 	// Serving static files
