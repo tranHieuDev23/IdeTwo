@@ -61,7 +61,7 @@ var resourcesConf = container.Resources{
 
 const timeoutStatusCode = 124
 
-// Run the compiler within a Debian container with gcc.
+// Run the compiler within a Debian container with g++.
 func (executor CJobExecutor) compileSourceFile(dir tempdir.TempDir, source source_code.SourceCode) *job_executor.JobExecutorOutput {
 	cli := executor.cli
 	ctx := context.Background()
@@ -69,7 +69,7 @@ func (executor CJobExecutor) compileSourceFile(dir tempdir.TempDir, source sourc
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Image:        "gcc:8.5-buster",
 		WorkingDir:   "/workdir",
-		Cmd:          []string{"timeout", "30s", "gcc", "-o", "main", "main.cpp"},
+		Cmd:          []string{"timeout", "30s", "g++", "-o", "main", "main.cpp"},
 		AttachStdout: true,
 		AttachStderr: true,
 	}, &container.HostConfig{

@@ -45,9 +45,9 @@ func executeJob(ctx context.Context, args ...interface{}) error {
 	var executor job_executor.JobExecutor
 	switch source.Language {
 	case source_code.C:
-		executor = cpp_job_executor.GetInstance()
-	case source_code.Cpp:
 		executor = c_job_executor.GetInstance()
+	case source_code.Cpp:
+		executor = cpp_job_executor.GetInstance()
 	case source_code.Java:
 		executor = java_job_executor.GetInstance()
 	case source_code.Python3:
